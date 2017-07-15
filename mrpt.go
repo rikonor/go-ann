@@ -2,6 +2,7 @@ package ann
 
 import (
 	"fmt"
+	"math/rand"
 
 	"github.com/gonum/matrix/mat64"
 )
@@ -32,11 +33,57 @@ func NewMRPTNNer(t int, l int, xs [][]float64) NNer {
 }
 
 func growTrees(xs [][]float64, t int, l int, a float64) []*tree {
-	return nil
+	// Number of vectors
+	n := len(xs)
+
+	// Infer vector dimension from xs
+	d := len(xs[0])
+
+	trees := []*tree{}
+
+	for i := 0; i < t; i++ {
+		// Create a new random projection matrix
+		r := mat64.NewDense(d, l, nil)
+		// Create one random vector per tree level
+		for j := 0; j < (l - 1); j++ {
+			vs := []float64{}
+
+			for k := 0; k < d; k++ {
+				// TODO: Use a sparse vector strategy
+				vs = append(vs, rand.NormFloat64())
+			}
+
+			// Set the random vector into the matrix
+			r.SetCol(j, vs)
+		}
+
+		X := mat64.NewDense(d, n, nil)
+		for j := 0; j < n; j++ {
+			X.SetCol(j, xs[j])
+		}
+
+		var P mat64.Dense
+		P.Mul(X, r)
+
+		// Create a new tree
+		trees = append(trees, &tree{
+			r:    r,
+			root: growTree(xs, l, 0, r),
+		})
+	}
+
+	return trees
 }
 
-func growTree(xs [][]float64, l int, P mat64.Matrix) {
+// growTree is a recursive function for building a RP tree
+// xs -> points
+// r -> random projection matrix
+func growTree(xs [][]float64, l, level int, r mat64.Matrix) *node {
+	if level == l {
+		return &node{xs: xs}
+	}
 
+	return nil
 }
 
 func (nn *mrpt) NN(q []float64) []float64 {

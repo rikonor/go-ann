@@ -30,6 +30,8 @@ func TestMRPTNNer(t *testing.T) {
 		[]float64{2, 2, 2, 2},
 	})
 
+	fmt.Printf("%# v\n", pretty.Formatter(nn))
+
 	r := mat64.NewDense(4, 3, nil)
 	r.SetCol(0, []float64{1, 0, 0, 0})
 	r.SetCol(1, []float64{1, 1, 0, -1})
@@ -66,6 +68,4 @@ func TestMRPTNNer(t *testing.T) {
 	p := nn.NN([]float64{1, 1, 1, 1})
 
 	fmt.Println(p)
-
-	fmt.Printf("%# v\n", pretty.Formatter(nn))
 }

@@ -4,9 +4,6 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
-
-	"github.com/gonum/matrix/mat64"
-	"github.com/kr/pretty"
 )
 
 func TestExhaustiveSearch(t *testing.T) {
@@ -23,49 +20,18 @@ func TestExhaustiveSearch(t *testing.T) {
 	}
 }
 
-func TestMRPTNNer(t *testing.T) {
+func TestMRPTNNerNew(t *testing.T) {
 	nn := NewMRPTNNer(1, 3, [][]float64{
-		[]float64{0, 0, 0, 0},
 		[]float64{1.1, 1.1, 1.1, 1.1},
+		[]float64{0, 0, 0, 0},
 		[]float64{2, 2, 2, 2},
+		[]float64{3, 3, 3, 3},
+		[]float64{4, 4, 4, 4},
+		[]float64{5, 5, 5, 5},
 	})
 
-	fmt.Printf("%# v\n", pretty.Formatter(nn))
-
-	r := mat64.NewDense(4, 3, nil)
-	r.SetCol(0, []float64{1, 0, 0, 0})
-	r.SetCol(1, []float64{1, 1, 0, -1})
-	r.SetCol(2, []float64{1, -1, 1, 0})
-
-	nnmrpt := nn.(*mrpt)
-	nnmrpt.trees = []*tree{
-		&tree{
-			r: r,
-			root: &node{
-				split: 1,
-				left: &node{
-					split: 1,
-					left: &node{
-						xs: [][]float64{[]float64{0, 0, 0, 0}},
-					},
-					right: &node{
-						xs: [][]float64{[]float64{1, 1, 1, 1}},
-					},
-				},
-				right: &node{
-					split: 1,
-					left: &node{
-						xs: [][]float64{[]float64{2, 2, 2, 2}},
-					},
-					right: &node{
-						xs: [][]float64{[]float64{3, 3, 3, 3}},
-					},
-				},
-			},
-		},
-	}
-
-	p := nn.NN([]float64{1, 1, 1, 1})
-
-	fmt.Println(p)
+	q := []float64{2.9, 2.9, 2.9, 2.9}
+	fmt.Printf("Querying for %v\n", q)
+	p := nn.NN(q)
+	fmt.Printf("\nResult: %v\n", p)
 }

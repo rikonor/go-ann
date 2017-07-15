@@ -16,6 +16,10 @@ func NewExhaustiveNNer(xs [][]float64) NNer {
 }
 
 func (nn *exhaustive) NN(q []float64) []float64 {
+	if len(nn.xs) == 0 {
+		return []float64{}
+	}
+
 	pnn := nn.xs[0]
 	dnn := euclideanDistanceSqrd(q, pnn)
 

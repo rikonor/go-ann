@@ -127,9 +127,17 @@ func (nn *mrpt) ANN(q []float64, k int) []int {
 	// How many votes does a vector need to be included in the output set
 	reqVotes := 1
 
+	// Convert q to a vector
+	qVec := mat.NewVector(len(q), q)
+
 	// Query the trees to get candidates
 	for _, tree := range nn.trees {
-		indices := queryTree(tree, q, k)
+		// Calculate projections for the query vector
+		var psVec mat.Vector
+		psVec.MulVec(tree.r.T(), qVec)
+		ps := mat.Col(nil, 0, &psVec)
+
+		indices := querySubtree(tree.root, ps, 0, k)
 		for _, i := range indices {
 			// Count vote
 			votesMap[i]++
@@ -160,36 +168,34 @@ func (nn *mrpt) ANN(q []float64, k int) []int {
 	return indices
 }
 
-func queryTree(tree *tree, q []float64, k int) []int {
-	return []int{}
-	// fmt.Printf("\nLooking for NN for %v\n", q)
-	//
-	// // Get vector dimension and depth of tree
-	// d, l := tree.r.Dims()
-	//
-	// // Convert q to a vector so we can perform matrix math
-	// qv := mat64.NewVector(d, q)
-	//
-	// // Project query point onto tree's random matrix
-	// var p mat64.Vector
-	// p.MulVec(tree.r.T(), qv)
-	//
-	// // Traverse the tree until point lands in a bucket
-	// node := tree.root
-	// for i := 0; i < l; i++ {
-	// 	if p.At(i, 0) <= node.split {
-	// 		node = node.left
-	// 	} else {
-	// 		node = node.right
-	// 	}
-	// }
-	//
-	// return node.xs
-}
+func querySubtree(node *node, ps []float64, level int, k int) []int {
+	// Stop when we have reached the bottom
+	if level == len(ps) {
+		return node.indices
+	}
 
-// func querySubtree(n *node, q []float64, k int) []int {
-//
-// }
+	// Get the projection for the current level
+	p := ps[level]
+
+	indices := []int{}
+	if p <= node.split {
+		// Left branch
+		indices = querySubtree(node.left, ps, level+1, k)
+		// If not enough found on left, try right
+		if len(indices) < k {
+			indices = append(indices, querySubtree(node.right, ps, level+1, k)...)
+		}
+	} else {
+		// Right branch
+		indices = querySubtree(node.right, ps, level+1, k)
+		// If not enough found on right, try left
+		if len(indices) < k {
+			indices = append(indices, querySubtree(node.left, ps, level+1, k)...)
+		}
+	}
+
+	return indices
+}
 
 // median calculates the median value of a series of elements
 func median(vals []float64) float64 {

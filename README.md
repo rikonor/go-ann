@@ -7,6 +7,10 @@ Status](https://travis-ci.org/rikonor/go-ann.svg?branch=master)](https://travis-
 
 Pure Go implementation of Approximate k-Nearest-Neighbor search.
 
+This package exposes:
+- A naive exact match implementation which can be used for testing purposes (`ExhaustiveANNer`).
+- An Approximate search based on the [MRPT algorithm](https://arxiv.org/pdf/1509.06957.pdf) (`MRPTANNer`).
+
 ### Usage
 
 The package exposes an `ANNer` interface:
@@ -47,7 +51,10 @@ indices := nn.ANN(q, k)
 ```
 
 Using approximate search
+
 ```go
+// Notice that the MRPT algorithm has a few tunable parameters: Number of trees and tree depth
+
 // Create a new ANN index using the MRPT algorithm
 nn := NewMRPTANNer(
   3,  // Number of trees

@@ -1,7 +1,7 @@
 package ann
 
 import (
-	"fmt"
+	"reflect"
 	"testing"
 )
 
@@ -21,7 +21,11 @@ func TestMRPTNNer(t *testing.T) {
 	indices := nn.ANN(q, 1)
 
 	// Should be closest to vector #1
-	fmt.Println(indices)
+	expectedIndices := []int{1}
+
+	if !reflect.DeepEqual(indices, expectedIndices) {
+		t.Fatalf("expected nn to be %v, got indices %v", expectedIndices, indices)
+	}
 }
 
 func TestMedian(t *testing.T) {

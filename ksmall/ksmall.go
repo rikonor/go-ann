@@ -10,9 +10,9 @@ func KSmallestIndices(vs []float64, k int) []int {
 	sort.Sort(byIndexedValue(indexedValues))
 
 	// Take k smallest indexes
-	indices := []int{}
+	indices := make([]int, k)
 	for i := 0; i < k; i++ {
-		indices = append(indices, indexedValues[i].index)
+		indices[i] = indexedValues[i].index
 	}
 
 	return indices
